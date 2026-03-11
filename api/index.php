@@ -37,9 +37,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['username'] = $input_username;
 
                     if ($is_admin) {
-                        header('Location: protected/admin.html');
+                        header('Location: admin.html');
                     } else {
-                        header('Location: protected/spam.html');
+                        header('Location: spam.html');
                     }
                     exit;
                 } else {
