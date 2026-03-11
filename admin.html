@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>إدارة المستخدمين - DAMAR SPAM</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0a0f1a;
+      color: #e0f7fa;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 580px;
+      margin: auto;
+      background: #0f1a2e;
+      padding: 2.5rem;
+      border-radius: 16px;
+      border: 1px solid #00ff9d33;
+      box-shadow: 0 0 35px rgba(0,255,157,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #00ff9d;
+      margin-bottom: 2rem;
+    }
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+      margin-bottom: 1.8rem;
+    }
+    .form-group {
+      flex: 1;
+      min-width: 220px;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #4fc3f7;
+      font-weight: 600;
+    }
+    input {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      background: #0d1b2a;
+      border: 1px solid #00bcd455;
+      border-radius: 8px;
+      color: white;
+      font-size: 1.05rem;
+    }
+    input:focus {
+      outline: none;
+      border-color: #00ff9d;
+      box-shadow: 0 0 0 3px rgba(0,255,157,0.2);
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin: 2rem 0 1.5rem;
+    }
+    button {
+      padding: 0.9rem 1.8rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-width: 160px;
+    }
+    .btn-add    { background: #00c853; color: black; }
+    .btn-edit   { background: #0288d1; color: white; }
+    .btn-delete { background: #d32f2f; color: white; }
+    button:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+    #message {
+      text-align: center;
+      font-size: 1.1rem;
+      margin: 1rem 0;
+      min-height: 1.5em;
+    }
+    .success { color: #00e676; }
+    .error   { color: #ff6b6b; }
+
+    .user-list {
+      margin-top: 2.5rem;
+    }
+    .user-list h3 {
+      color: #80deea;
+      margin-bottom: 1rem;
+    }
+    .user-item {
+      background: #1e293b;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>إدارة المستخدمين</h1>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label>اسم المستخدم</label>
+      <input type="text" id="username" placeholder="اسم المستخدم" autocomplete="off" />
+    </div>
+
+    <div class="form-group">
+      <label>كلمة المرور الجديدة</label>
+      <input type="text" id="password" placeholder="تُستخدم عند الإضافة أو التعديل فقط" autocomplete="off" />
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn-add"    onclick="addUser()">إضافة مستخدم</button>
+    <button class="btn-edit"   onclick="changePassword()">تغيير كلمة المرور</button>
+    <button class="btn-delete" onclick="deleteUser()">مسح المستخدم</button>
+  </div>
+
+  <div id="message"></div>
+
+  <div class="user-list">
+    <h3>المستخدمون الحاليون:</h3>
+    <div id="usersContainer"></div>
+  </div>
+</div>
+
+<script>
+  const API = 'process.php';
+
+  function msg(text, type = '') {
+    const el = document.getElementById('message');
+    el.textContent = text;
+    el.className = type;
+  }
+
+  async function request(action, username, password = '') {
+    try {
+      const fd = new FormData();
+      fd.append('action', action);
+      fd.append('username', username);
+      if (password) fd.append('password', password);
+
+      const r = await fetch(API, { method: 'POST', body: fd });
+      const d = await r.json();
+
+      msg(d.message, d.success ? 'success' : 'error');
+      if (d.success) loadUsers();
+    } catch (e) {
+      msg('فشل الاتصال بالخادم', 'error');
+    }
+  }
+
+  function addUser() {
+    const u = document.getElementById('username').value.trim();
+    const p = document.getElementById('password').value.trim();
+    if (!u || !p) return msg('املأ اسم المستخدم وكلمة المرور', 'error');
+    request('add', u, p);
+  }
+
+  function changePassword() {
+    const u = document.getElementById('username').value.trim();
+    const p = document.getElementById('password').value.trim();
+    if (!u || !p) return msg('أدخل اسم المستخدم وكلمة المرور الجديدة', 'error');
+    request('edit', u, p);
+  }
+
+  function deleteUser() {
+    const u = document.getElementById('username').value.trim();
+    if (!u) return msg('أدخل اسم المستخدم المراد مسحه', 'error');
+    if (!confirm(`هل أنت متأكد من حذف المستخدم ${u} ؟`)) return;
+    request('delete', u);
+  }
+
+  async function loadUsers() {
+    try {
+      const fd = new FormData();
+      fd.append('action', 'list');
+
+      const r = await fetch(API, { method: 'POST', body: fd });
+      const d = await r.json();
+
+      const container = document.getElementById('usersContainer');
+      container.innerHTML = '';
+
+      if (d.success && d.users?.length > 0) {
+        d.users.forEach(name => {
+          const div = document.createElement('div');
+          div.className = 'user-item';
+          div.innerHTML = `<span>${name}</span>`;
+          container.appendChild(div);
+        });
+      } else {
+        container.innerHTML = '<p style="color:#94a3b8; text-align:center;">لا يوجد مستخدمون بعد</p>';
+      }
+    } catch {}
+  }
+
+  // تحميل القائمة عند فتح الصفحة
+  loadUsers();
+</script>
+
+</body>
+</html>
