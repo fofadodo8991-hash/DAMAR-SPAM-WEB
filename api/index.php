@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($input_username) || empty($input_password)) {
         $error = 'يرجى ملء جميع الحقول';
     } else {
-        $json_path = __DIR__ . '/protected/users.json';
+        $json_path = __DIR__ . 'users.json';
 
         if (file_exists($json_path)) {
             $json_content = file_get_contents($json_path);
