@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($input_username) || empty($input_password)) {
         $error = 'يرجى ملء جميع الحقول';
     } else {
-        $json_path = __DIR__ . '/protected/users.json';
+        $json_path = __DIR__ . 'users.json';
 
         if (file_exists($json_path)) {
             $json_content = file_get_contents($json_path);
@@ -37,9 +37,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['username'] = $input_username;
 
                     if ($is_admin) {
-                        header('Location: protected/admin.html');
+                        header('Location: admin.html');
                     } else {
-                        header('Location: protected/spam.html');
+                        header('Location: spam.html');
                     }
                     exit;
                 } else {
