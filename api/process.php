@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json');
 
-$jsonFile = 'api/users.json';
+$jsonFile = 'users.json';
 
 if (!file_exists($jsonFile)) {
     file_put_contents($jsonFile, json_encode(['users' => []], JSON_PRETTY_PRINT));
